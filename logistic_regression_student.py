@@ -1,6 +1,6 @@
 from sklearn.datasets import fetch_openml
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn import metrics
 import numpy as np
 import pandas as pd
@@ -42,11 +42,19 @@ def plot_weights(coef):
 
 # main code
 if __name__ == "__main__":
+    # init variables
+    dim_row = 0
+    dim_col = 0
+    iters = 0
+
     if mode == 'mnist':
         X, y = fetch_openml("mnist_784", version=1, return_X_y=True, as_frame=False, parser='auto')
         dim_row = 28
         dim_col = 28
         iters = 30
+    elif mode == 'own':
+        # import own json
+        pass
     else:
         # change file location to correct file location
         with open(f"{os.path.dirname(os.path.realpath(__file__))}/all_drawings.json", 'r') as file:
@@ -59,3 +67,25 @@ if __name__ == "__main__":
 
     # split either dataset
     X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+    # Use this parameter grid for your Parameter Optimisation - Do not change these values!
+    parameter_grid = {
+        'classifier__n_neighbors': [2, 3, 4, 5, 6, 7, 8, 9, 10],
+        'classifier__weights': ['uniform', 'distance'],
+        'classifier__p': [1, 2]
+    }
+
+    # init classifier
+    log_reg = LogisticRegression()
+
+    # fit and score the KNNmodel in the pipeline for each parameter
+    grid_search = GridSearchCV(log_reg, parameter_grid, cv=3, scoring='accuracy', verbose=1)
+    grid_search.fit(X_train, y_train)
+    accuracy = grid_search.score(X_test, y_test)
+    best_estimator = grid_search.best_estimator_
+    best_estimator.coef_
+
+
+    print(accuracy)
+    plot_digits(X_test, y_test)
+    plot_weights(coef)
