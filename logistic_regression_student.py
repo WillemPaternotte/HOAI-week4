@@ -11,22 +11,7 @@ import os
 # you can train the logistic regression from the patch or from mnist
 mode = 'patch' # mnist or patch
 
-if mode == 'mnist':
-    X, y = fetch_openml("mnist_784", version=1, return_X_y=True, as_frame=False, parser='auto')
-    dim_row = 28
-    dim_col = 28
-    iters = 30
-else:
-    # change file location to correct file location
-    with open(f"{os.path.dirname(os.path.realpath(__file__))}/all_drawings.json", 'r') as file:
-        data = json.load(file)
-    X = np.array([np.ravel(d[0]) for d in data])
-    y = np.array([d[1] for d in data])
-    dim_row = 27
-    dim_col = 19
-    iters = 1000 
-
-
+# Helper functions
 def plot_digits(X_test, y_test):
     plt.figure(figsize=(20,6))
     for i in range(10):
@@ -54,3 +39,23 @@ def plot_weights(coef):
         coef_plot.set_xlabel(f'Class {i}')
 
     plt.show()
+
+# main code
+if __name__ == "__main__":
+    if mode == 'mnist':
+        X, y = fetch_openml("mnist_784", version=1, return_X_y=True, as_frame=False, parser='auto')
+        dim_row = 28
+        dim_col = 28
+        iters = 30
+    else:
+        # change file location to correct file location
+        with open(f"{os.path.dirname(os.path.realpath(__file__))}/all_drawings.json", 'r') as file:
+            data = json.load(file)
+        X = np.array([np.ravel(d[0]) for d in data])
+        y = np.array([d[1] for d in data])
+        dim_row = 27
+        dim_col = 19
+        iters = 1000
+
+    # split either dataset
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
