@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import json
 import os
 
+grid_values = {'penalty': ['l1','l2'], 'C': [0.001,0.01,0.1,1,10,100,1000]}
+
 # you can train the logistic regression from the patch or from mnist
 mode = 'patch' # mnist or patch
 
