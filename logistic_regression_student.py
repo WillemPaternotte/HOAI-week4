@@ -8,10 +8,9 @@ import matplotlib.pyplot as plt
 import json
 import os
 
-grid_values = {'penalty': ['l1','l2'], 'C': [0.001,0.01,0.1,1,10,100,1000]}
 
 # you can train the logistic regression from the patch or from mnist
-mode = 'patch' # mnist or patch
+mode = 'mnist' # mnist or patch
 
 # Helper functions
 def plot_digits(X_test, y_test):
@@ -54,6 +53,7 @@ if __name__ == "__main__":
         dim_row = 28
         dim_col = 28
         iters = 30
+        max_iterations = 3
     elif mode == 'own':
         # import own json
         pass
@@ -66,28 +66,31 @@ if __name__ == "__main__":
         dim_row = 27
         dim_col = 19
         iters = 1000
+        max_iterations = 50
 
     # split either dataset
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Use this parameter grid for your Parameter Optimisation - Do not change these values!
-    parameter_grid = {
-        'classifier__n_neighbors': [2, 3, 4, 5, 6, 7, 8, 9, 10],
-        'classifier__weights': ['uniform', 'distance'],
-        'classifier__p': [1, 2]
-    }
+    parameter_grid = {'penalty': ['l1','l2'], 'C': [0.001,0.01,0.1,1,10,100,1000]}
 
     # init classifier
-    log_reg = LogisticRegression()
+    log_reg = LogisticRegression(max_iter= max_iterations)
 
-    # fit and score the KNNmodel in the pipeline for each parameter
-    grid_search = GridSearchCV(log_reg, parameter_grid, cv=3, scoring='accuracy', verbose=1)
+    # fit and score the logisticRegression in the pipeline for each parameter
+    grid_search = GridSearchCV(estimator=log_reg,
+                               param_grid=parameter_grid,
+                               scoring='accuracy',
+                               cv=5,
+                               verbose=0)
+
     grid_search.fit(X_train, y_train)
     accuracy = grid_search.score(X_test, y_test)
-    best_estimator = grid_search.best_estimator_
-    best_estimator.coef_
+    best_estimator_coef = grid_search.best_estimator_.coef_
+    # best_estimator.coef_
 
 
     print(accuracy)
+    print(best_estimator_coef)
     plot_digits(X_test, y_test)
-    plot_weights(coef)
+    plot_weights(best_estimator_coef)
