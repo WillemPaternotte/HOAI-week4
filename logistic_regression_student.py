@@ -6,15 +6,18 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
 import os
 
+grid_values = {'penalty': ['l1','l2'], 'C': [0.001,0.01,0.1,1,10,100,1000]}
 
 # you can train the logistic regression from the patch or from mnist
-mode = 'mnist' # mnist or patch
+mode = 'patch' # mnist or patch
 
 # Helper functions
 def plot_digits(X_test, y_test):
-    plt.figure(figsize=(20,6))
+    plt.figure(figsize=(14,4))
     for i in range(10):
         if np.where(y_test==f"{i}")[0].size > 0:
             index = np.where(y_test==f"{i}")[0][0]
@@ -40,6 +43,7 @@ def plot_weights(coef):
         coef_plot.set_xlabel(f'Class {i}')
 
     plt.show()
+
 
 # main code
 if __name__ == "__main__":
@@ -75,7 +79,7 @@ if __name__ == "__main__":
     parameter_grid = {'penalty': ['l1','l2'], 'C': [0.001,0.01,0.1,1,10,100,1000]}
 
     # init classifier
-    log_reg = LogisticRegression(max_iter= max_iterations)
+    log_reg = LogisticRegression(max_iter=max_iterations)
 
     # fit and score the logisticRegression in the pipeline for each parameter
     grid_search = GridSearchCV(estimator=log_reg,
@@ -88,9 +92,19 @@ if __name__ == "__main__":
     accuracy = grid_search.score(X_test, y_test)
     best_estimator_coef = grid_search.best_estimator_.coef_
     # best_estimator.coef_
-
+    # predicition = grid_search.predict(X_test)
 
     print(accuracy)
     print(best_estimator_coef)
     plot_digits(X_test, y_test)
     plot_weights(best_estimator_coef)
+
+    # Confusion Matrix
+    plt.figure(figsize=(8, 6))
+    predictions = grid_search.predict(X_test)
+    conf_matrix = confusion_matrix(y_test, predictions)
+    sns.heatmap(conf_matrix, annot=True, fmt="d")
+    plt.xlabel("Predicted")
+    plt.ylabel("True")
+    plt.title('Confusion Matrix')
+    plt.show()
